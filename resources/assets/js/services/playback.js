@@ -1,6 +1,7 @@
 import { shuffle, orderBy } from 'lodash'
 import plyr from 'plyr'
 import Vue from 'vue'
+import isMobile from 'ismobilejs'
 
 import { event } from '../utils'
 import { queueStore, sharedStore, userStore, songStore, preferenceStore as preferences } from '../stores'
@@ -55,7 +56,11 @@ export const playback = {
      */
     document.querySelector('.plyr').addEventListener('canplaythrough', e => {
       const nextSong = queueStore.next
-      if (!nextSong || nextSong.preloaded) {
+      if (!nextSong || nextSong.preloaded || (isMobile.any && preferences.transcodeOnMobile)) {
+        // Don't preload if
+        // - there's no next song
+        // - next song has already been preloaded
+        // - we're on mobile and "transcode" option is checked
         return
       }
 
@@ -78,6 +83,13 @@ export const playback = {
 
     // Init the equalizer if supported.
     event.emit('equalizer:init', this.player.media)
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => this.resume())
+      navigator.mediaSession.setActionHandler('pause', () => this.pause())
+      navigator.mediaSession.setActionHandler('previoustrack', () => this.playPrev())
+      navigator.mediaSession.setActionHandler('nexttrack', () => this.playNext())
+    }
 
     this.initialized = true
   },
@@ -155,6 +167,18 @@ export const playback = {
     } catch (e) {
       // Notification fails.
       // @link https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification
+    }
+
+    if ('mediaSession' in navigator) {
+      /* global MediaMetadata */
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.title,
+        artist: song.artist.name,
+        album: song.album.name,
+        artwork: [
+          { src: song.album.cover, sizes: '256x256', type: 'image/png' }
+        ]
+      })
     }
   },
 

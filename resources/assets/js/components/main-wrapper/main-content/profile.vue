@@ -51,6 +51,12 @@
             Confirm before closing Koel
           </label>
         </div>
+        <div class="form-row">
+          <label>
+            <input type="checkbox" name="transcodeOnMobile" v-model="prefs.transcodeOnMobile" @change="savePreference">
+            Convert and play media at 128kbps on mobile
+          </label>
+        </div>
       </div>
 
       <section class="lastfm" >
@@ -62,7 +68,7 @@
               It appears that you have connected your Last.fm account as well – Perfect!
             </span>
             <span v-else>
-              It appears that you haven’t connected to your Last.fm account thought.
+              It appears that you haven’t connected to your Last.fm account though.
             </span>
           </p>
           <p>
@@ -92,8 +98,8 @@
         <div v-else>
           <p>This installation of Koel has no Last.fm integration.
             <span v-if="state.current.is_admin">Visit
-              <a href="https://github.com/phanan/koel/wiki" target="_blank">Koel’s Wiki</a>
-              for a quick how-to. Really, you should do it.
+              <a href="https://koel.phanan.net/docs/#/3rd-party?id=last-fm" target="_blank">Koel’s Wiki</a>
+              for a quick how-to.
             </span>
             <span v-else>Try politely asking your administrator to enable it.</span>
           </p>
